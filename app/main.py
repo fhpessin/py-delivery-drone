@@ -1,9 +1,19 @@
+class Cargo:
+    def __init__(self, weight: int) -> None:
+        self.weight = weight
+
+
 class BaseRobot:
-    def __init__(self, name: str, weight: int, coords: list = None) -> None:
+    def __init__(
+        self, 
+        name: str, 
+        weight: int, 
+        coords: list | None = None
+    ) -> None:
         self.name = name
         self.weight = weight
-        # Garantimos que coords seja [0, 0] se nada for passado
-        self.coords = coords if coords is not None else [0, 0]
+        # Checklist #4: Usando 'or' para atribuição padrão
+        self.coords = coords or [0, 0]
 
     def go_forward(self, step: int = 1) -> None:
         self.coords[1] += step
@@ -22,11 +32,14 @@ class BaseRobot:
 
 
 class FlyingRobot(BaseRobot):
-    def __init__(self, name: str, weight: int, coords: list = None) -> None:
-        # Se coords não for passado, o padrão para FlyingRobot é [0, 0, 0]
-        if coords is None:
-            coords = [0, 0, 0]
-        super().__init__(name, weight, coords)
+    def __init__(
+        self, 
+        name: str, 
+        weight: int, 
+        coords: list | None = None
+    ) -> None:
+        # Checklist #4: Garantindo [0, 0, 0] como padrão para robôs voadores
+        super().__init__(name, weight, coords or [0, 0, 0])
 
     def go_up(self, step: int = 1) -> None:
         self.coords[2] += step
@@ -41,19 +54,18 @@ class DeliveryDrone(FlyingRobot):
         name: str,
         weight: int,
         max_load_weight: int,
-        coords: list = None,
-        current_load: any = None
+        coords: list | None = None,
+        current_load: Cargo | None = None
     ) -> None:
         super().__init__(name, weight, coords)
         self.max_load_weight = max_load_weight
-        # Inicializamos current_load como None para usar o hook_load com segurança
         self.current_load = None
         
+        # Tentamos acoplar a carga se ela for passada no construtor
         if current_load is not None:
             self.hook_load(current_load)
 
-    def hook_load(self, cargo: any) -> None:
-        # Verifica se o drone está livre e se aguenta o peso
+    def hook_load(self, cargo: Cargo) -> None:
         if self.current_load is None and cargo.weight <= self.max_load_weight:
             self.current_load = cargo
 
